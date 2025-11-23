@@ -36,7 +36,7 @@ class ColorTrixPage extends StatefulWidget {
 }
 
 class _ColorTrixPageState extends State<ColorTrixPage> {
-  File? _imageFile;
+  Uint8List? _imageBytes;
   img.Image? _originalImage;
   img.Image? _processedImage;
   final ImagePicker _picker = ImagePicker();
@@ -65,13 +65,15 @@ class _ColorTrixPageState extends State<ColorTrixPage> {
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
+      // Load the image bytes
+      final bytes = await image.readAsBytes();
+      
       setState(() {
-        _imageFile = File(image.path);
+        _imageBytes = bytes;
         _processedImage = null;
       });
 
-      // Load the image
-      final bytes = await _imageFile!.readAsBytes();
+      // Decode the image
       _originalImage = img.decodeImage(bytes);
     }
   }
@@ -154,41 +156,63 @@ class _ColorTrixPageState extends State<ColorTrixPage> {
       // Encode the image to PNG
       final png = img.encodePng(_processedImage!);
 
-      // Get the appropriate directory based on platform
-      Directory directory;
-      if (Platform.isAndroid) {
-        // For Android, try to get the external storage directory
-        directory = await getApplicationDocumentsDirectory();
-      } else if (Platform.isIOS) {
-        // For iOS, use the application documents directory
-        directory = await getApplicationDocumentsDirectory();
+      if (kIsWeb) {
+        // For web, trigger download using browser API
+        // Note: This requires additional web-specific implementation
+        // For now, we'll just show a message
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Download Image'),
+              content: const Text(
+                  'On web, please right-click the processed image and select "Save image as..."'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
       } else {
-        // For other platforms, use downloads directory if available
-        directory = await getDownloadsDirectory() ??
-            await getApplicationDocumentsDirectory();
-      }
+        // For mobile/desktop platforms
+        Directory directory;
+        if (Platform.isAndroid) {
+          // For Android, try to get the external storage directory
+          directory = await getApplicationDocumentsDirectory();
+        } else if (Platform.isIOS) {
+          // For iOS, use the application documents directory
+          directory = await getApplicationDocumentsDirectory();
+        } else {
+          // For other platforms, use downloads directory if available
+          directory = await getDownloadsDirectory() ??
+              await getApplicationDocumentsDirectory();
+        }
 
-      // Create a file with timestamp
-      final fileName =
-          'colortrix_${DateTime.now().millisecondsSinceEpoch}.png';
-      final file = File('${directory.path}/$fileName');
-      await file.writeAsBytes(png);
+        // Create a file with timestamp
+        final fileName =
+            'colortrix_${DateTime.now().millisecondsSinceEpoch}.png';
+        final file = File('${directory.path}/$fileName');
+        await file.writeAsBytes(png);
 
-      // Show a dialog with the saved path
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Image Saved'),
-            content: Text('Image saved to:\n${file.path}'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
-              ),
-            ],
-          ),
-        );
+        // Show a dialog with the saved path
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Image Saved'),
+              content: Text('Image saved to:\n${file.path}'),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
       }
     } catch (e) {
       // Show error dialog if saving fails
@@ -279,7 +303,7 @@ class _ColorTrixPageState extends State<ColorTrixPage> {
       Colors.blue,
       Colors.yellow,
       Colors.cyan,
-      Colors.magenta,
+      const Color(0xFFFF00FF), // Magenta
       Colors.white,
       Colors.black,
     ];
@@ -426,7 +450,7 @@ class _ColorTrixPageState extends State<ColorTrixPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              if (_imageFile != null) ...[
+              if (_imageBytes != null) ...[
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -440,8 +464,8 @@ class _ColorTrixPageState extends State<ColorTrixPage> {
                         ),
                         const SizedBox(height: 12),
                         Center(
-                          child: Image.file(
-                            _imageFile!,
+                          child: Image.memory(
+                            _imageBytes!,
                             height: 300,
                             fit: BoxFit.contain,
                           ),
