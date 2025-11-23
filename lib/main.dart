@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -83,18 +85,13 @@ class _ColorTrixPageState extends State<ColorTrixPage> {
         .toList();
   }
 
-  Future<void> _processImage() async {
-    if (_originalImage == null) return;
+  static img.Image _applyMatrixTransformation(
+      Map<String, dynamic> params) {
+    final img.Image original = params['image'] as img.Image;
+    final List<List<double>> matrix =
+        params['matrix'] as List<List<double>>;
 
-    setState(() {
-      _isProcessing = true;
-    });
-
-    // Get the matrix values
-    final matrix = _getMatrix();
-
-    // Process the image in a separate computation
-    final processed = img.Image.from(_originalImage!);
+    final processed = img.Image.from(original);
 
     for (int y = 0; y < processed.height; y++) {
       for (int x = 0; x < processed.width; x++) {
@@ -125,6 +122,25 @@ class _ColorTrixPageState extends State<ColorTrixPage> {
       }
     }
 
+    return processed;
+  }
+
+  Future<void> _processImage() async {
+    if (_originalImage == null) return;
+
+    setState(() {
+      _isProcessing = true;
+    });
+
+    // Get the matrix values
+    final matrix = _getMatrix();
+
+    // Process the image in a separate isolate for better performance
+    final processed = await compute(_applyMatrixTransformation, {
+      'image': _originalImage!,
+      'matrix': matrix,
+    });
+
     setState(() {
       _processedImage = processed;
       _isProcessing = false;
@@ -134,29 +150,63 @@ class _ColorTrixPageState extends State<ColorTrixPage> {
   Future<void> _saveImage() async {
     if (_processedImage == null) return;
 
-    // Encode the image to PNG
-    final png = img.encodePng(_processedImage!);
+    try {
+      // Encode the image to PNG
+      final png = img.encodePng(_processedImage!);
 
-    // Create a temporary file
-    final directory = Directory.systemTemp;
-    final file = File('${directory.path}/processed_image_${DateTime.now().millisecondsSinceEpoch}.png');
-    await file.writeAsBytes(png);
+      // Get the appropriate directory based on platform
+      Directory directory;
+      if (Platform.isAndroid) {
+        // For Android, try to get the external storage directory
+        directory = await getApplicationDocumentsDirectory();
+      } else if (Platform.isIOS) {
+        // For iOS, use the application documents directory
+        directory = await getApplicationDocumentsDirectory();
+      } else {
+        // For other platforms, use downloads directory if available
+        directory = await getDownloadsDirectory() ??
+            await getApplicationDocumentsDirectory();
+      }
 
-    // Show a dialog with the saved path
-    if (mounted) {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Image Saved'),
-          content: Text('Image saved to:\n${file.path}'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      // Create a file with timestamp
+      final fileName =
+          'colortrix_${DateTime.now().millisecondsSinceEpoch}.png';
+      final file = File('${directory.path}/$fileName');
+      await file.writeAsBytes(png);
+
+      // Show a dialog with the saved path
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Image Saved'),
+            content: Text('Image saved to:\n${file.path}'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      // Show error dialog if saving fails
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text('Failed to save image: $e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 
