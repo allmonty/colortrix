@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:colortrix/components/matrix_form.dart';
+import 'package:colortrix/components/presets_list.dart';
 import 'package:colortrix/components/reference_palette.dart';
 import 'package:colortrix/models/input_model.dart';
 import 'package:colortrix/components/preview_image_matrix_shader.dart';
@@ -142,10 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisSize: MainAxisSize.max,
               children: [MatrixForm(), SizedBox(width: 10), ReferencePalette()],
             ),
-            Container(
-              alignment: Alignment.center,
-              child: Text("Presets coming soon..."),
-            ),
+            Container(alignment: Alignment.center, child: PresetsList()),
           ],
         ),
       ),
