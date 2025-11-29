@@ -4,28 +4,27 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 class ImageUploader extends StatelessWidget {
-  ImageUploader({super.key, this.model});
+  ImageUploader({super.key});
 
   final ImagePicker picker = ImagePicker();
 
-  final ImageModel? model;
-
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: model,
-      child: SizedBox(
-        height: 300,
-        width: 300,
-        child: ElevatedButton(
-          onPressed: () => showModalBootomImagePicker(context),
-          child: Text("Image Picker"),
-        ),
-      ),
+    return Consumer<ImageModel>(
+      builder: (context, model, child) {
+        return SizedBox(
+          height: 300,
+          width: 300,
+          child: ElevatedButton(
+            onPressed: () => showModalBootomImagePicker(context, model),
+            child: Text("Image Picker"),
+          ),
+        );
+      },
     );
   }
 
-  void showModalBootomImagePicker(BuildContext context) {
+  void showModalBootomImagePicker(BuildContext context, ImageModel? model) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -58,15 +57,19 @@ class ImageUploader extends StatelessWidget {
 
   void _imgFromCamera(ImageModel model) async {
     // Capture a photo from camera.
-    await picker
-        .pickImage(source: ImageSource.camera)
-        .then((value) => model.set(value!));
+    await picker.pickImage(source: ImageSource.camera).then((value) {
+      if (value != null) {
+        model.set(value);
+      }
+    });
   }
 
   void _imgFromGallery(ImageModel model) async {
     // Pick an image from gallery.
-    await picker
-        .pickImage(source: ImageSource.gallery)
-        .then((value) => model.set(value!));
+    await picker.pickImage(source: ImageSource.gallery).then((value) {
+      if (value != null) {
+        model.set(value);
+      }
+    });
   }
 }

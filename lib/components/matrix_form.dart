@@ -77,7 +77,6 @@ Widget showModal(int i, int j, InputModel inputModel) {
             Expanded(
               flex: 4,
               child: Slider(
-                min: -1,
                 value: min(1, value),
                 onChanged: (value) {
                   setState(() {

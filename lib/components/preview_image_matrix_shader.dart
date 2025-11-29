@@ -2,12 +2,11 @@ import 'package:colortrix/models/image_model.dart';
 import 'package:colortrix/models/input_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_filters/flutter_image_filters.dart';
+import 'package:provider/provider.dart';
 
+// A widget that displays a preview of the image with the color matrix shader applied.
 class PreviewImageMatrixShader extends StatefulWidget {
-  final ImageModel? imageModel;
-  final InputModel? inputModel;
-
-  const PreviewImageMatrixShader({super.key, this.imageModel, this.inputModel});
+  const PreviewImageMatrixShader({super.key});
 
   @override
   State<PreviewImageMatrixShader> createState() =>
@@ -28,27 +27,32 @@ class _PreviewImageMatrixShaderState extends State<PreviewImageMatrixShader> {
 
   @override
   Widget build(BuildContext context) {
-    configuration.colorMatrix = enabled
-        ? widget.inputModel!.matrix.transposed()
-        : Matrix4.identity();
-    return GestureDetector(
-      onTapUp: (_) {
-        setState(() {
-          enabled = true;
-        });
+    return Consumer2<ImageModel, InputModel>(
+      builder: (context, imageModel, inputModel, _) {
+        configuration.colorMatrix = enabled
+            ? inputModel.matrix.transposed()
+            : Matrix4.identity();
+
+        return GestureDetector(
+          onTapUp: (_) {
+            setState(() {
+              enabled = true;
+            });
+          },
+          onTapDown: (_) {
+            setState(() {
+              enabled = false;
+            });
+          },
+          child: imageModel.texture != null
+              ? ImageShaderPreview(
+                  texture: imageModel.texture!,
+                  configuration: configuration,
+                  fix: BoxFit.contain,
+                )
+              : Center(child: CircularProgressIndicator()),
+        );
       },
-      onTapDown: (_) {
-        setState(() {
-          enabled = false;
-        });
-      },
-      child: widget.imageModel!.texture != null
-          ? ImageShaderPreview(
-              texture: widget.imageModel!.texture!,
-              configuration: configuration,
-              fix: BoxFit.contain,
-            )
-          : Center(child: CircularProgressIndicator()),
     );
   }
 }

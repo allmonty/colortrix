@@ -1,14 +1,14 @@
 import 'dart:math';
-import 'dart:ui' as ui;
 
 import 'package:colortrix/components/matrix_form.dart';
+import 'package:colortrix/components/reference_palette.dart';
 import 'package:colortrix/models/input_model.dart';
 import 'package:colortrix/components/preview_image_matrix_shader.dart';
 import 'package:colortrix/models/image_model.dart';
 import 'package:colortrix/components/image_uploader.dart';
 import 'package:flutter/material.dart';
-import 'package:gal/gal.dart';
 import 'package:provider/provider.dart';
+import 'package:tab_container/tab_container.dart';
 
 const String title = 'ColorTrix';
 
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       title: title,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 38, 0, 104),
+          seedColor: const Color.fromARGB(255, 42, 41, 42),
           brightness: Brightness.dark,
         ),
       ),
@@ -64,20 +64,8 @@ class _MyHomePageState extends State<MyHomePage> {
               Consumer2<ImageModel, InputModel>(
                 builder: (context, imageModel, inputModel, _) {
                   return ElevatedButton(
-                    onPressed: () async {
-                      await Gal.requestAccess();
-                      final image = await imageModel.textureAsImage(
-                        inputModel.matrix.transposed(),
-                      );
-                      if (image == null) return;
-
-                      final byteData = await image.toByteData(
-                        format: ui.ImageByteFormat.png,
-                      );
-                      if (byteData != null) {
-                        await Gal.putImageBytes(byteData.buffer.asUint8List());
-                      }
-                    },
+                    onPressed: () =>
+                        imageModel.download(inputModel.matrix.transposed()),
                     child: Icon(Icons.download),
                   );
                 },
@@ -90,35 +78,14 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (context, imageModel, inputModel, _) {
           return Center(
             child: SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20),
-                  Container(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.95,
-                      maxHeight: MediaQuery.of(context).size.height * 0.5,
-                    ),
-                    padding: EdgeInsets.all(10),
-                    child: imageModel.texture == null
-                        ? ImageUploader(model: imageModel)
-                        : PreviewImageMatrixShader(
-                            imageModel: imageModel,
-                            inputModel: inputModel,
-                          ),
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      MatrixForm(),
-                      SizedBox(width: 10),
-                      buildReferencePalette(inputModel),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                ],
+              child: Container(
+                padding: EdgeInsets.all(10),
+                constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.95,
+                ),
+                child: imageModel.texture == null
+                    ? ImageUploader()
+                    : PreviewImageMatrixShader(),
               ),
             ),
           );
@@ -126,68 +93,47 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       bottomNavigationBar: Container(
         color: Theme.of(context).colorScheme.primaryContainer,
-        height: max(
-          MediaQuery.of(context).viewInsets.bottom,
-          MediaQuery.of(context).viewPadding.bottom,
+        constraints: BoxConstraints.tight(
+          Size(MediaQuery.of(context).size.width, 230),
         ),
-      ),
-    );
-  }
-
-  Widget buildReferencePalette(InputModel inputModel) {
-    List<Color> colors = [
-      Color.fromARGB(255, 255, 0, 0),
-      Color.fromARGB(255, 0, 255, 0),
-      Color.fromARGB(255, 0, 0, 255),
-      Color.fromARGB(255, 255, 0, 255),
-      Color.fromARGB(255, 0, 255, 255),
-      Color.fromARGB(255, 255, 255, 0),
-    ];
-
-    return SizedBox(
-      height: 150,
-      child: Column(
-        children: [
-          for (Color color in colors)
+        padding: EdgeInsets.all(5),
+        margin: EdgeInsets.only(
+          bottom: max(
+            MediaQuery.of(context).viewInsets.bottom,
+            MediaQuery.of(context).viewPadding.bottom,
+          ),
+        ),
+        child: TabContainer(
+          curve: Curves.easeInOut,
+          tabEdge: TabEdge.bottom,
+          tabBorderRadius: BorderRadius.circular(10),
+          selectedTextStyle: TextStyle(
+            color: Theme.of(context).colorScheme.primary,
+            fontSize: 16.0,
+          ),
+          unselectedTextStyle: TextStyle(
+            color: Theme.of(context).colorScheme.secondary,
+            fontSize: 13.0,
+          ),
+          colors: [
+            Theme.of(context).colorScheme.surface,
+            Theme.of(context).colorScheme.surface,
+          ],
+          childPadding: EdgeInsets.all(10),
+          tabs: [Text("Matrix"), Text("Presets")],
+          children: [
             Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: color,
-                    shape: BoxShape.circle,
-                  ),
-                  width: 20,
-                  height: 20,
-                ),
-                Icon(Icons.arrow_forward),
-                Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color.fromARGB(
-                      255,
-                      ((color.r * inputModel.matrix[0] +
-                                  color.g * inputModel.matrix[1] +
-                                  color.b * inputModel.matrix[2]) *
-                              255)
-                          .toInt(),
-                      ((color.r * inputModel.matrix[4] +
-                                  color.g * inputModel.matrix[5] +
-                                  color.b * inputModel.matrix[6]) *
-                              255)
-                          .toInt(),
-                      ((color.r * inputModel.matrix[8] +
-                                  color.g * inputModel.matrix[9] +
-                                  color.b * inputModel.matrix[10]) *
-                              255)
-                          .toInt(),
-                    ),
-                  ),
-                ),
-              ],
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: [MatrixForm(), SizedBox(width: 10), ReferencePalette()],
             ),
-        ],
+            Container(
+              alignment: Alignment.center,
+              child: Text("Presets coming soon..."),
+            ),
+          ],
+        ),
       ),
     );
   }
