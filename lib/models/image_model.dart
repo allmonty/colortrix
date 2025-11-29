@@ -10,6 +10,11 @@ import 'package:image_picker/image_picker.dart';
 class ImageModel extends ChangeNotifier {
   TextureSource? texture;
 
+  void clear() {
+    texture = null;
+    notifyListeners();
+  }
+
   void set(XFile file) async {
     if (file.path.isEmpty) return;
 
@@ -34,11 +39,11 @@ class ImageModel extends ChangeNotifier {
     if (kIsWeb) {
       return;
     } else if (Platform.isAndroid || Platform.isIOS) {
-      await downloadMobile(matrix);
+      await _downloadMobile(matrix);
     }
   }
 
-  Future<void> downloadMobile(Matrix4 matrix) async {
+  Future<void> _downloadMobile(Matrix4 matrix) async {
     await Gal.requestAccess();
 
     final image = await textureAsImage(matrix);

@@ -65,7 +65,7 @@ Widget showModal(int i, int j, InputModel inputModel) {
       String text = inputModel.getEntry(i, j).toStringAsFixed(2);
 
       return Container(
-        height: 200,
+        height: 100,
         padding: EdgeInsets.only(
           bottom: max(
             MediaQuery.of(context).viewInsets.bottom,

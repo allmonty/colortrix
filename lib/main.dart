@@ -63,11 +63,25 @@ class _MyHomePageState extends State<MyHomePage> {
               Text(widget.title),
               Consumer2<ImageModel, InputModel>(
                 builder: (context, imageModel, inputModel, _) {
-                  return ElevatedButton(
-                    onPressed: () =>
-                        imageModel.download(inputModel.matrix.transposed()),
-                    child: Icon(Icons.download),
-                  );
+                  if (imageModel.texture != null) {
+                    return Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => imageModel.clear(),
+                          child: Icon(Icons.clear),
+                        ),
+                        SizedBox(width: 5),
+                        ElevatedButton(
+                          onPressed: () => imageModel.download(
+                            inputModel.matrix.transposed(),
+                          ),
+                          child: Icon(Icons.download),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return Container();
+                  }
                 },
               ),
             ],
