@@ -14,106 +14,10 @@ class PresetsList extends StatefulWidget {
 class PresetsListState extends State<PresetsList> {
   final ScrollController scrollController = ScrollController();
 
-  List<String> get presetNames => ['Sepia', 'Grayscale'];
-
-  List<Matrix4> get presets => [
-    // Sepia matrix example
-    Matrix4(
-      0.393,
-      0.769,
-      0.189,
-      0, //
-      0.349,
-      0.686,
-      0.168,
-      0, //
-      0.272,
-      0.534,
-      0.131,
-      0, //
-      0,
-      0,
-      0,
-      1,
-    ),
-    Matrix4(
-      0.299,
-      0.587,
-      0.114,
-      0, //
-      0.299,
-      0.587,
-      0.114,
-      0, //
-      0.299,
-      0.587,
-      0.114,
-      0, //
-      0,
-      0,
-      0,
-      1, //
-    ),
-    Matrix4(
-      1,
-      0,
-      0,
-      0, //
-      0,
-      0,
-      1,
-      0, //
-      0,
-      1,
-      0,
-      0, //
-      0,
-      0,
-      0,
-      1, //
-    ),
-    Matrix4(
-      0.75,
-      0.60,
-      0.05,
-      0, //
-      0.05,
-      0.10,
-      0.85,
-      0, //
-      0.35,
-      0.65,
-      0,
-      0, //
-      0,
-      0,
-      0,
-      1, //
-    ),
-    Matrix4(
-      0.92,
-      0.30,
-      0.02,
-      0, //
-      0.03,
-      0.70,
-      0.27,
-      0, //
-      0.15,
-      0.45,
-      0.80,
-      0, //
-      0,
-      0,
-      0,
-      1, //
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     final imageModel = Provider.of<ImageModel>(context);
-    final inputModel = Provider.of<InputModel>(context, listen: false);
+    final inputModel = Provider.of<InputModel>(context);
 
     return SingleChildScrollView(
       controller: scrollController,
@@ -121,13 +25,20 @@ class PresetsListState extends State<PresetsList> {
       child: imageModel.texture != null
           ? Row(
               children: [
-                for (int i = 0; i < presets.length; i++)
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(padding: EdgeInsets.all(10)),
+                  onPressed: () => inputModel.savePreset(),
+                  child: Icon(Icons.add, size: 50),
+                ),
+                for (int i = 0; i < inputModel.presets.length; i++)
                   MaterialButton(
-                    onPressed: () => inputModel.set(presets[i].transposed()),
+                    onLongPress: () => inputModel.removePreset(i),
+                    onPressed: () =>
+                        inputModel.set(inputModel.presets[i].transposed()),
                     child: ImageShaderPreview(
                       texture: imageModel.texture!,
                       configuration: ColorMatrixShaderConfiguration()
-                        ..colorMatrix = presets[i]
+                        ..colorMatrix = inputModel.presets[i]
                         ..intensity = 1.0,
                       fix: BoxFit.contain,
                     ),
