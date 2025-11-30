@@ -10,7 +10,7 @@ class InputModel extends ChangeNotifier {
     Matrix4(
       0, 1, 0, 0,
       1, 0, 0, 0,
-      0, 1, 0, 0,
+      0, 0, 1, 0,
       0, 0, 0, 1),
     Matrix4(
       0, 0, 1, 0,
