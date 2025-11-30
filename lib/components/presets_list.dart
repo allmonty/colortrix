@@ -12,12 +12,17 @@ class PresetsList extends StatefulWidget {
 }
 
 class PresetsListState extends State<PresetsList> {
-  final ScrollController scrollController = ScrollController();
+  ScrollController scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    scrollController = ScrollController(debugLabel: "PresetsListScrollController");
+  }
 
   @override
   Widget build(BuildContext context) {
     final imageModel = Provider.of<ImageModel>(context);
-    final inputModel = Provider.of<InputModel>(context);
 
     return SingleChildScrollView(
       controller: scrollController,
@@ -27,18 +32,24 @@ class PresetsListState extends State<PresetsList> {
               children: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(padding: EdgeInsets.all(10)),
-                  onPressed: () => inputModel.savePreset(),
+                  onPressed: () {
+                    context.read<InputModel>().savePreset();
+                    setState(() {});
+                  },
                   child: Icon(Icons.add, size: 50),
                 ),
-                for (int i = 0; i < inputModel.presets.length; i++)
+                for (int i = 0; i < Provider.of<InputModel>(context, listen: false).presets.length; i++)
                   MaterialButton(
-                    onLongPress: () => inputModel.removePreset(i),
+                    onLongPress: () {
+                      context.read<InputModel>().removePreset(i);
+                      setState(() {});
+                    },
                     onPressed: () =>
-                        inputModel.set(inputModel.presets[i].transposed()),
+                        context.read<InputModel>().set(context.read<InputModel>().presets[i].transposed()),
                     child: ImageShaderPreview(
                       texture: imageModel.texture!,
                       configuration: ColorMatrixShaderConfiguration()
-                        ..colorMatrix = inputModel.presets[i]
+                        ..colorMatrix = context.read<InputModel>().presets[i]
                         ..intensity = 1.0,
                       fix: BoxFit.contain,
                     ),
