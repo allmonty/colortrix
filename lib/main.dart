@@ -132,9 +132,10 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ),
         child: TabContainer(
-          curve: Curves.easeInOut,
           tabEdge: TabEdge.bottom,
           tabBorderRadius: BorderRadius.circular(10),
+          tabExtent: 42,
+          curve: Curves.easeInOut,
           selectedTextStyle: TextStyle(
             color: Theme.of(context).colorScheme.primary,
             fontSize: 16.0,

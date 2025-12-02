@@ -28,7 +28,7 @@ class ImageUploader extends StatelessWidget {
   void showModalBootomImagePicker(BuildContext context, ImageModel? model) {
     showModalBottomSheet(
       context: context,
-      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
       builder: (_) {
         return SafeArea(
           child: Wrap(

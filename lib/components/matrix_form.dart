@@ -20,12 +20,14 @@ class MatrixFormState extends State<MatrixForm> {
       width: 300,
       height: 150,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           for (var i = 0; i < 3; i++)
             SizedBox(
               width: 300,
               height: 50,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   for (var j = 0; j < 3; j++)
                     SizedBox(
@@ -73,6 +75,7 @@ Widget showModal(int i, int j, InputModel inputModel) {
           ),
         ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Expanded(
               flex: 4,
