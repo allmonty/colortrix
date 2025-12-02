@@ -1,0 +1,14 @@
+{
+    "language": "Português (Brasil)",
+
+    "appname": "ColorTrix",
+
+    "image_upload__title": "Selecionar Imagem",
+    "image_upload__library": "Biblioteca de Fotos",
+    "image_upload__camera": "Câmera",
+
+    "tabs__matrix": "Matriz",
+    "tabs__presets": "Estilos",
+
+    "presets__disabled_message": "Selecione uma imagem para mostrar os estilos salvos"
+}

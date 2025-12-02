@@ -1,3 +1,4 @@
+import 'package:colortrix/l10n/generated/app_localizations.dart';
 import 'package:colortrix/models/image_model.dart';
 import 'package:colortrix/models/input_model.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +59,7 @@ class PresetsListState extends State<PresetsList> {
             )
           : Container(
               alignment: Alignment.center,
-              child: const Text("Pick image to show presets"),
+              child: Text(AppLocalizations.of(context)!.presets__disabled_message),
             ),
     );
   }

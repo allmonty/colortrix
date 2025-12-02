@@ -1,17 +1,18 @@
 import 'dart:math';
+import 'package:colortrix/l10n/generated/app_localizations.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:tab_container/tab_container.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:colortrix/components/matrix_form.dart';
 import 'package:colortrix/components/presets_list.dart';
 import 'package:colortrix/components/reference_palette.dart';
+import 'package:colortrix/l10n/l10n.dart';
 import 'package:colortrix/models/input_model.dart';
 import 'package:colortrix/components/preview_image_matrix_shader.dart';
 import 'package:colortrix/models/image_model.dart';
 import 'package:colortrix/components/image_uploader.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:tab_container/tab_container.dart';
-
-const String title = 'ColorTrix';
 
 void main() {
   runApp(const MyApp());
@@ -23,28 +24,34 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: title,
+      title: 'ColorTrix',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color.fromARGB(255, 42, 41, 42),
           brightness: Brightness.dark,
         ),
       ),
+      supportedLocales: L10n.all,
+      locale: Locale("pt"),
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: MultiProvider(
         providers: [
           ChangeNotifierProvider(create: (_) => ImageModel()),
           ChangeNotifierProvider(create: (_) => InputModel()),
         ],
-        child: const MyHomePage(title: title),
+        child: const MyHomePage(),
       ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -67,7 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(widget.title),
+              Text(AppLocalizations.of(context)!.appname),
               Consumer2<ImageModel, InputModel>(
                 builder: (context, imageModel, inputModel, _) {
                   if (imageModel.texture != null) {
@@ -141,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Theme.of(context).colorScheme.surface,
           ],
           childPadding: EdgeInsets.all(10),
-          tabs: [Text("Matrix"), Text("Presets")],
+          tabs: [Text(AppLocalizations.of(context)!.tabs__matrix), Text(AppLocalizations.of(context)!.tabs__presets)],
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

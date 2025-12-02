@@ -1,0 +1,14 @@
+{
+    "language": "English",
+
+    "appname": "ColorTrix",
+
+    "image_upload__title": "Image Picker",
+    "image_upload__library": "Photo Library",
+    "image_upload__camera": "Camera",
+
+    "tabs__matrix": "Matrix",
+    "tabs__presets": "Presets",
+
+    "presets__disabled_message": "Pick image to show presets"
+}

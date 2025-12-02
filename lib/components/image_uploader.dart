@@ -1,3 +1,4 @@
+import 'package:colortrix/l10n/generated/app_localizations.dart';
 import 'package:colortrix/models/image_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,7 +18,7 @@ class ImageUploader extends StatelessWidget {
           width: 300,
           child: ElevatedButton(
             onPressed: () => showModalBootomImagePicker(context, model),
-            child: Text("Image Picker"),
+            child: Text(AppLocalizations.of(context)!.image_upload__title),
           ),
         );
       },
@@ -34,7 +35,7 @@ class ImageUploader extends StatelessWidget {
             children: <Widget>[
               ListTile(
                 leading: Icon(Icons.photo_library),
-                title: Text('Photo Library'),
+                title: Text(AppLocalizations.of(context)!.image_upload__library),
                 onTap: () {
                   _imgFromGallery(model!);
                   Navigator.of(context).pop();
@@ -42,7 +43,7 @@ class ImageUploader extends StatelessWidget {
               ),
               ListTile(
                 leading: Icon(Icons.photo_camera),
-                title: Text('Camera'),
+                title: Text(AppLocalizations.of(context)!.image_upload__camera),
                 onTap: () {
                   _imgFromCamera(model!);
                   Navigator.of(context).pop();
