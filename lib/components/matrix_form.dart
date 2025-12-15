@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:colortrix/models/input_model.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,40 +15,77 @@ class MatrixForm extends StatefulWidget {
 class MatrixFormState extends State<MatrixForm> {
   MatrixFormState();
 
+  List<Color> colorsList = [Colors.red, Colors.green, Colors.blue];
+
+  List<String> colorsText = ["R", "G", "B"];
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: 300,
-      height: 150,
+      height: 200,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           for (var i = 0; i < 3; i++)
             SizedBox(
               width: 300,
               height: 50,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colorsList[i],
+                    ),
+                    child: Center(
+                      child: Text(
+                        colorsText[i],
+                        textScaler: TextScaler.linear(1.5),
+                      ),
+                    ),
+                  ),
                   for (var j = 0; j < 3; j++)
                     SizedBox(
-                      width: 100,
+                      width: 80,
                       height: 50,
-                      child: ElevatedButton(
-                        child: Text(
-                          Provider.of<InputModel>(
-                            context,
-                          ).matrix.entry(i, j).toStringAsFixed(2),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(50),
+                          border: Border(
+                            bottom: BorderSide(color: colorsList[j], width: 2),
+                          ),
                         ),
-                        onPressed: () => showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          barrierColor: Colors.transparent,
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primaryContainer,
-                          builder: (_) =>
-                              showModal(i, j, context.watch<InputModel>()),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: const Size.fromHeight(50),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          onPressed: () => showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            barrierColor: Colors.transparent,
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primaryContainer,
+                            builder: (_) =>
+                                showModal(i, j, context.watch<InputModel>()),
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              Provider.of<InputModel>(
+                                context,
+                              ).matrix.entry(i, j).toStringAsFixed(2),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -68,7 +106,7 @@ Widget showModal(int i, int j, InputModel inputModel) {
 
       return Container(
         height: 100,
-        padding: EdgeInsets.only(
+        margin: EdgeInsets.only(
           bottom: max(
             MediaQuery.of(context).viewInsets.bottom,
             MediaQuery.of(context).viewPadding.bottom,
@@ -80,29 +118,17 @@ Widget showModal(int i, int j, InputModel inputModel) {
             Expanded(
               flex: 4,
               child: Slider(
-                value: min(1, value),
+                label: text,
+                min: -1.0,
+                max: 1.0,
+                value: clampDouble(-1.0, value, 1.0),
                 onChanged: (value) {
                   setState(() {
-                    value = value;
+                    value = value < -0.02 || 0.02 < value ? value : 0.0;
+                    text = value.toStringAsFixed(2);
                     inputModel.setEntry(i, j, value);
                   });
                 },
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: TextFormField(
-                controller: TextEditingController.fromValue(
-                  TextEditingValue(text: text),
-                ),
-                onChanged: (newValue) {
-                  setState(() {
-                    value = double.tryParse(newValue) ?? 0.0;
-                    text = value.toStringAsFixed(2);
-                  });
-                  inputModel.setEntry(i, j, double.tryParse(newValue) ?? 0.0);
-                },
-                keyboardType: TextInputType.number,
               ),
             ),
           ],

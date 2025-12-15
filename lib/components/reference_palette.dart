@@ -22,6 +22,8 @@ class ReferencePalette extends StatelessWidget {
       builder: (context, inputModel, child) => SizedBox(
         height: 150,
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             for (Color color in colors)
               Row(
@@ -34,7 +36,10 @@ class ReferencePalette extends StatelessWidget {
                     width: 20,
                     height: 20,
                   ),
-                  Icon(Icons.arrow_forward),
+                  Icon(
+                    Icons.arrow_forward,
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                  ),
                   Container(
                     width: 20,
                     height: 20,

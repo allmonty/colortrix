@@ -30,6 +30,9 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 42, 41, 42),
           brightness: Brightness.dark,
         ),
+        sliderTheme: SliderThemeData(
+          showValueIndicator: ShowValueIndicator.onDrag,
+        ),
       ),
       supportedLocales: L10n.all,
       locale: Locale("pt"),
@@ -149,7 +152,10 @@ class _MyHomePageState extends State<MyHomePage> {
             Theme.of(context).colorScheme.surface,
           ],
           childPadding: EdgeInsets.all(10),
-          tabs: [Text(AppLocalizations.of(context)!.tabs__matrix), Text(AppLocalizations.of(context)!.tabs__presets)],
+          tabs: [
+            Text(AppLocalizations.of(context)!.tabs__matrix),
+            Text(AppLocalizations.of(context)!.tabs__presets),
+          ],
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
