@@ -33,22 +33,59 @@ class _PreviewImageMatrixShaderState extends State<PreviewImageMatrixShader> {
             ? inputModel.matrix.transposed()
             : Matrix4.identity();
 
-        return GestureDetector(
-          onTapUp: (_) {
-            setState(() {
-              enabled = true;
-            });
-          },
-          onTapDown: (_) {
-            setState(() {
-              enabled = false;
-            });
-          },
+        return Container(
+          alignment: Alignment.center,
           child: imageModel.texture != null
-              ? ImageShaderPreview(
-                  texture: imageModel.texture!,
-                  configuration: configuration,
-                  fix: BoxFit.contain,
+              ? GestureDetector(
+                  onTapUp: (_) {
+                    setState(() {
+                      enabled = true;
+                    });
+                  },
+                  onTapDown: (_) {
+                    setState(() {
+                      enabled = false;
+                    });
+                  },
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final maxW = constraints.maxWidth.isFinite && constraints.maxWidth > 0
+                          ? constraints.maxWidth
+                          : MediaQuery.of(context).size.width;
+                      final maxH = constraints.maxHeight.isFinite && constraints.maxHeight > 0
+                          ? constraints.maxHeight
+                          : MediaQuery.of(context).size.height;
+
+                      final aspect = imageModel.texture!.aspectRatio;
+                      // Compute a finite size that fits within available space while keeping aspect.
+                      double width = maxW;
+                      double height = width / aspect;
+                      if (height > maxH) {
+                        height = maxH;
+                        width = height * aspect;
+                      }
+
+                      return InteractiveViewer(
+                        boundaryMargin: const EdgeInsets.all(20.0),
+                        minScale: 0.5,
+                        maxScale: 5.0,
+                        child: SizedBox(
+                          width: maxW,
+                          height: maxH,
+                          child: Center(
+                            child: SizedBox(
+                              width: width,
+                              height: height,
+                              child: ImageShaderPreview(
+                                texture: imageModel.texture!,
+                                configuration: configuration,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 )
               : Center(child: CircularProgressIndicator()),
         );

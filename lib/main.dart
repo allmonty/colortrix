@@ -108,17 +108,9 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Consumer2<ImageModel, InputModel>(
         builder: (context, imageModel, inputModel, _) {
           return Center(
-            child: SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.all(10),
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.95,
-                ),
-                child: imageModel.texture == null
-                    ? ImageUploader()
-                    : PreviewImageMatrixShader(),
-              ),
-            ),
+            child: imageModel.texture == null
+                ? ImageUploader()
+                : PreviewImageMatrixShader(),
           );
         },
       ),
